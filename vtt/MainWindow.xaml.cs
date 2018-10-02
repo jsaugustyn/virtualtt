@@ -30,9 +30,17 @@ namespace vtt
         private int gridLineSpacing = 20;
         private bool isDynamic = false;
 
+        private bool scaleToGrid = true;
+        private int gridScaleInches = 1;
+        private double screenPixelWidth = 3840;
+        private double screenPixelHeight = 2160;
+        private double screenPhysicalWidth = 13.6;
+        private double screenPhysicalHeight = 7.6;
+        private double screenDpiScaling = 2.5;
+
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            gridBrush = new SolidColorBrush(Colors.Black);
+            gridBrush = new SolidColorBrush(Colors.Cyan);
             gridBrush.Opacity = gridOpacity;
 
             if(isDynamic)
@@ -46,9 +54,6 @@ namespace vtt
                 ShowMap();
             }
 
-            DrawGrid();
-
-
         }
 
         private void ShowMap()
@@ -58,13 +63,38 @@ namespace vtt
             ib.ImageSource = new BitmapImage(new Uri(path, UriKind.Absolute));
             ib.Stretch = Stretch.Uniform;
             mapCanvas.Background = ib;
+
+            if(scaleToGrid)
+            {
+                ScaleMap();
+            }
+            DrawGrid();
             
+        }
+
+        private void ScaleMap()
+        {
+            // display grid calibration tool - establishes scaling of map image (pixels to distance on map)
+
+
+            // sample code...just makes a 1" grid
+            double hscale = screenPixelWidth / screenPhysicalWidth;
+            double vscale = screenPixelHeight / screenPhysicalHeight;
+
+            gridLineSpacing = (int)(((hscale + vscale) / 2)/screenDpiScaling);
         }
 
         private void ShowVideo()
         {
             vttMediaViewer.Source = new Uri(@"C:\Users\Jason\Documents\Unity\vtt\Assets\MapImages\Docks_gridless.m4v");
             vttMediaViewer.LoadedBehavior = MediaState.Manual;
+
+            if(scaleToGrid)
+            {
+                ScaleMap();
+            }
+            DrawGrid();
+
             vttMediaViewer.Play();
         }
 
@@ -74,7 +104,6 @@ namespace vtt
 
             double width = gridCanvas.ActualWidth;
             double height = gridCanvas.ActualHeight;
-            //int gridLineSpacing = 10;
 
             for(int i=0;i<height; i+=gridLineSpacing)
             {
@@ -86,7 +115,7 @@ namespace vtt
                 line.Y1 = i;
                 line.Y2 = i;
 
-                line.StrokeThickness = 1;
+                line.StrokeThickness = 2;
                 gridCanvas.Children.Add(line);
             }
 
